@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION["utilisateur"]) || $_SESSION["role"] !== "admin") {
+if (!isset($_SESSION["utilisateur"]) || $_SESSION["role"] !== "admin") {//verifier que c'est admin (seulement admin qui peut entrer dans cette page)
     header("Location: login.php"); 
 }
 require "db.php";
@@ -10,7 +10,7 @@ $message = "";
 // Supprimer un utilisateur
 if (isset($_GET["supprimer_user"])) {
     $id = (int)$_GET["supprimer_user"];
-    // Sécurité : on ne peut pas supprimer son propre compte
+    //verfication pour admin pour n'est pas supprimer sont compte
     if ($id !== (int)$_SESSION["user_id"]) {
         $conn->prepare("DELETE FROM users WHERE id = :id")->execute([":id"=>$id]);
         $message = "🗑️ Utilisateur supprimé !";
@@ -27,15 +27,15 @@ if (isset($_POST["changer_role"])) {
     $message = "✅ Rôle mis à jour !";
 }
 
-// Récupérer utilisateurs séparés par rôle
-$employes = $conn->query("SELECT * FROM users WHERE role = 'employe' ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+// Récupérer utilisateurs séparés par rôle pour bien gérer
+$employes = $conn->query("SELECT * FROM users WHERE role = 'employe' ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);//query pas de donnée exterieur
 $clients  = $conn->query("SELECT * FROM users WHERE role = 'client'  ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 $admins   = $conn->query("SELECT * FROM users WHERE role = 'admin'   ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 // Stats globales
-$totalProduits = $conn->query("SELECT COUNT(*) FROM produits")->fetchColumn();
-$totalStock    = $conn->query("SELECT SUM(stock) FROM produits")->fetchColumn();
-$totalValeur   = $conn->query("SELECT SUM(prix * stock) FROM produits")->fetchColumn();
+$totalProduits = $conn->query("SELECT COUNT(*) FROM produits")->fetchColumn();//le nombre total des produit
+$totalStock    = $conn->query("SELECT SUM(stock) FROM produits")->fetchColumn();//totale de tout le stock
+$totalValeur   = $conn->query("SELECT SUM(prix * stock) FROM produits")->fetchColumn();//valeur de tout le stock en argent
 ?>
 <!DOCTYPE html>
 <html lang="fr">
