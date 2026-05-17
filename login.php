@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-// Si déjà connecté, rediriger directement
+// ila kan deja m'conecter kadirlo redirger direct
 if (isset($_SESSION["utilisateur"])) {
-    header("Location: dashboard_" . $_SESSION["role"] . ".php");
+    header("Location: dashboard_" . $_SESSION["role"] . ".php");//hna kadtedi utlisateur 3la hsab le role dyalo
     exit();
 }
 
@@ -14,29 +14,26 @@ $errpassword = "";
 $errgeneral  = "";
 $success     = "";
 
-// ─────────────────────────────────────────────
-// INSCRIPTION
-// ─────────────────────────────────────────────
+// recupuration des donnée par le formulaire
 if (isset($_POST["inscrire"])) {
-    $nom_complet = trim($_POST["nom_complet"]);
-    $login       = trim($_POST["login"]);
+    $nom_complet = $_POST["nom_complet"];
+    $login       = $_POST["login"];
     $password    = $_POST["password"];
     $role        = $_POST["role"]; // client ou employe
 
     // Validation simple
     if (empty($login))       $errlogin    = "Le login est obligatoire !";
     if (empty($password))    $errpassword = "Le mot de passe est obligatoire !";
-    if (strlen($password) < 4) $errpassword = "Mot de passe trop court (min 4 caractères) !";
-
-    if (empty($errlogin) && empty($errpassword)) {
+   
+    if (empty($errlogin) && empty($errpassword)) {// si utulisateur entre les deux login et pass
         // Vérifier si le login existe déjà
         $stmt = $conn->prepare("SELECT id FROM users WHERE login = :login");
         $stmt->execute([":login" => $login]);
 
-        if ($stmt->rowCount() > 0) {
+        if ($stmt->rowCount() > 0) {//Combien de personnes portent ce nom dans la liste de bd si il est superieur à 1:
             $errlogin = "Ce login est déjà pris !";
         } else {
-            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $hash = password_hash($password, PASSWORD_DEFAULT);//pour que le pass est imposible aà retrouver
             $stmt = $conn->prepare("
                 INSERT INTO users (nom_complet, login, password, role)
                 VALUES (:nom_complet, :login, :password, :role)
@@ -52,25 +49,25 @@ if (isset($_POST["inscrire"])) {
     }
 }
 
-// ─────────────────────────────────────────────
+
 // CONNEXION
-// ─────────────────────────────────────────────
-if (isset($_POST["connecter"])) {
-    $login    = trim($_POST["login"]);
+
+if (isset($_POST["connecter"])) {// verfier l'uctulisateur si il clic dns la button ou pas
+    $login    = $_POST["login"];
     $password = $_POST["password"];
 
     if (empty($login))    $errlogin    = "Le login est obligatoire !";
     if (empty($password)) $errpassword = "Le mot de passe est obligatoire !";
 
     if (empty($errlogin) && empty($errpassword)) {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE login = :login");
+        $stmt = $conn->prepare("SELECT * FROM users WHERE login = :login");//chercher dans la bd un utulisateur avec ce login
         $stmt->execute([":login" => $login]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user["password"])) {
+        if ($user && password_verify($password, $user["password"])) {//compare le pass avec le pass hasher
             // Connexion réussie → stocker en session
             $_SESSION["utilisateur"]  = $user["login"];
-            $_SESSION["nom_complet"]  = $user["nom_complet"];
+            $_SESSION["nom_complet"]  = $user["nom_complet"];// stocker tout les information dans une session
             $_SESSION["role"]         = $user["role"];
             $_SESSION["user_id"]      = $user["id"];
 
