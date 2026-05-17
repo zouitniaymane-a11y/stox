@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION["utilisateur"]) || !in_array($_SESSION["role"], ["employe","admin"])) {
+if (!isset($_SESSION["utilisateur"]) || !in_array($_SESSION["role"], ["employe","admin"])) {//verfication que c'est pas un client
     header("Location: login.php"); 
 }
 require "db.php";
